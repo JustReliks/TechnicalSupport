@@ -1,0 +1,19 @@
+spring:
+  liquibase:
+    enabled: true
+  datasource:
+    username: test_user
+    password: test_password
+    url: jdbc:postgresql://localhost:5432/
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-test-query: SELECT 1
+  sql:
+    init:
+      mode: NEVER
+  docker:
+    compose:
+      enabled: true
+      skip:
+        in-tests: true
+      lifecycle-management: start_and_stop
