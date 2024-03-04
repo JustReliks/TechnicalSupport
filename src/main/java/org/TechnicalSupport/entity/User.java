@@ -3,6 +3,7 @@ package org.TechnicalSupport.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -12,6 +13,9 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Table(name = "t_user")
+@NamedEntityGraph(name = "User.roles",
+        attributeNodes = @NamedAttributeNode("roles")
+)
 public class User {
 
     @Id
@@ -27,6 +31,6 @@ public class User {
     @JoinTable(name = "t_user_role",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id")})
-    private Set<Role> roles;
+    private Set<Role> roles = new HashSet<>();
 
 }

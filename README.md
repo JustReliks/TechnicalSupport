@@ -28,3 +28,7 @@ status:
 - id
 - name
   values: (Draft, Sent, Accepted, Rejected)
+
+
+Замечания:
+- Пароль в эндопойт логина нужно передавать в зашифрованном виде Base64.

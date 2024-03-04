@@ -17,3 +17,6 @@ spring:
       skip:
         in-tests: true
       lifecycle-management: start_and_stop
+jwt:
+  secret: vcNwqkM76h45gpVhDbC8Zs6e8IGGp1W4
+  expiration: 43200

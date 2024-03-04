@@ -16,7 +16,7 @@ public class UserDtoFactoryImpl implements DtoFactory<User, UserDto> {
                 .username(user.getUsername())
                 .roles(user.getRoles()
                         .stream()
-                        .map(role -> role.getRole().name())
+                        .map(role -> role.getRoleEnum().name())
                         .collect(Collectors.toSet()))
                 .build();
     }
