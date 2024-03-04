@@ -11,7 +11,7 @@ create TABLE t_role (
     name varchar(200) NOT NULL
 );
 
-insert into t_role(id, name) values (0, 'USER'), (1, 'OPERATOR'), (2, 'ADMIN');
+insert into t_role(name) values ('USER'), ('OPERATOR'), ('ADMIN');
 
 create TABLE t_user_role(
     id serial NOT NULL constraint t_user_role_pk PRIMARY KEY,
@@ -24,14 +24,14 @@ create TABLE t_status(
     name varchar(50) NOT NULL
 );
 
-insert into t_status(id, name) values (0, 'DRAFT'), (1, 'SENT'), (2, 'ACCEPTED'), (3, 'REJECTED');
+insert into t_status(name) values ('DRAFT'), ('SENT'), ('ACCEPTED'), ('REJECTED');
 
 create TABLE t_request(
     id serial NOT NULL constraint t_request_pk PRIMARY KEY,
     name varchar(50) NOT NULL,
-    phone_number varchar(10) NOT NULL,
+    phone_number varchar(18) NOT NULL,
     message text NOT NULL,
     created_by integer NOT NULL REFERENCES t_user(id),
     status_id integer NOT NULL REFERENCES t_status(id),
-    create_at timestamp NOT NULL
+    created_at timestamp NOT NULL
 );

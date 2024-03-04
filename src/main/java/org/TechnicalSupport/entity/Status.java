@@ -10,7 +10,7 @@ import org.TechnicalSupport.entity.enums.RequestStatus;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "t_role")
+@Table(name = "t_status")
 public class Status {
 
     @Id
@@ -19,6 +19,6 @@ public class Status {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "name")
-    private RequestStatus status;
+    private RequestStatus statusEnum;
 
 }

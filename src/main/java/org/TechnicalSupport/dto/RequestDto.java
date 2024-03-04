@@ -4,14 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.TechnicalSupport.entity.enums.RequestStatus;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class UserLoginDto {
+@NoArgsConstructor
+public class RequestDto {
 
-    private String username;
-    private String token;
+    private String name;
+    private String text;
+    private String phoneNumber;
 
 }

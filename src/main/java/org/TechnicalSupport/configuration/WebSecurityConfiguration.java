@@ -1,6 +1,7 @@
 package org.TechnicalSupport.configuration;
 
 import lombok.RequiredArgsConstructor;
+import org.TechnicalSupport.controllers.RequestController;
 import org.TechnicalSupport.controllers.UserController;
 import org.TechnicalSupport.entity.enums.UserRole;
 import org.TechnicalSupport.security.jwt.JwtAuthenticationEntryPoint;
@@ -32,7 +33,7 @@ public class WebSecurityConfiguration {
                                 .permitAll()
                                 .requestMatchers(UserController.REGISTER_USER)
                                 .permitAll()
-                                .requestMatchers(UserController.LIST_ALL_USERS).hasAnyAuthority(UserRole.USER.name())
+                                .requestMatchers(UserController.LIST_ALL_USERS, RequestController.CREATE_REQUEST).hasAnyAuthority(UserRole.USER.name())
                                 .anyRequest()
                                 .authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))

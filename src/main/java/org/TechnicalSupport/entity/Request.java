@@ -30,6 +30,7 @@ public class Request {
     private User createdBy;
 
     @Column(name = "created_at")
+    @Builder.Default
     private Instant createdAt = Instant.now();
 
     @ManyToOne(fetch = FetchType.LAZY)

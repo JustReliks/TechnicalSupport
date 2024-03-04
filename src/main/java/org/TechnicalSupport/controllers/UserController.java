@@ -6,6 +6,7 @@ import org.TechnicalSupport.dto.UserLoginDto;
 import org.TechnicalSupport.dto.UserLoginRequestDto;
 import org.TechnicalSupport.dto.factories.DtoFactory;
 import org.TechnicalSupport.entity.User;
+import org.TechnicalSupport.exception.UserAlreadyExistsException;
 import org.TechnicalSupport.repository.UserRepository;
 import org.TechnicalSupport.security.JwtUserDetails;
 import org.TechnicalSupport.service.LoginService;
@@ -40,6 +41,9 @@ public class UserController {
 
     @PostMapping(REGISTER_USER)
     public Long register(@RequestBody UserLoginRequestDto userLogin) {
+        if (userRepository.findUserByUsername(userLogin.getUsername()).isPresent()) {
+            throw new UserAlreadyExistsException("User with name %s already exists!".formatted(userLogin.getUsername()));
+        }
         return registerService.register(userLogin.getUsername(), userLogin.getPassword());
     }
 
