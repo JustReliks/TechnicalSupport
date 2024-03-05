@@ -33,7 +33,9 @@ public class WebSecurityConfiguration {
                                 .permitAll()
                                 .requestMatchers(UserController.REGISTER_USER)
                                 .permitAll()
-                                .requestMatchers(UserController.LIST_ALL_USERS, RequestController.CREATE_REQUEST).hasAnyAuthority(UserRole.USER.name())
+                                .requestMatchers(UserController.LIST_ALL_USERS,
+                                        RequestController.CREATE_REQUEST,
+                                        RequestController.FETCH_REQUESTS).hasAnyAuthority(UserRole.USER.name())
                                 .anyRequest()
                                 .authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))

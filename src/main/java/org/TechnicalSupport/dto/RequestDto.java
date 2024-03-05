@@ -1,19 +1,30 @@
 package org.TechnicalSupport.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.TechnicalSupport.entity.enums.RequestStatus;
 
-@Data
-@Builder
+import java.time.Instant;
+
+
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestDto {
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class RequestDto extends SimpleRequestDto {
 
-    private String name;
-    private String text;
-    private String phoneNumber;
+    private String createdBy;
+    private Instant createAt;
+    private RequestStatus status;
+
+    @Builder
+    public RequestDto(String name, String phoneNumber, String message,
+                      String createdBy, Instant createdAt, RequestStatus status) {
+        setName(name);
+        setMessage(message);
+        setPhoneNumber(phoneNumber);
+        this.createAt = createdAt;
+        this.createdBy = createdBy;
+        this.status = status;
+    }
 
 }
