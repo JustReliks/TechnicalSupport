@@ -14,7 +14,6 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public Long register(String username, String password) {
-       // password = new String(Base64.getDecoder().decode(password));
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);

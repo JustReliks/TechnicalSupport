@@ -17,7 +17,6 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public JwtUserDetails login(UserLoginRequestDto loginRequestDto) {
-        // String encoded = Arrays.toString(Base64.getDecoder().decode(loginRequestDto.getPassword()));
         return authenticationService.authenticate(loginRequestDto.getUsername(), loginRequestDto.getPassword());
     }
 
