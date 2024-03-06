@@ -9,13 +9,13 @@ import java.util.List;
 
 public interface OperatorService {
 
-    List<Request> fetchPageOfRequests(int page, int countOnPage, Sort.Direction direction, String... sortParams);
+    List<Request> fetchPageOfRequests(int page, int countOnPage, Sort.Direction direction, String sortParam);
 
-    List<Request> fetchPageOfRequestsFiltered(String name, int page, int countOnPage, Sort.Direction direction, String... sortParams);
+    List<Request> fetchPageOfRequestsFiltered(String name, int page, int countOnPage, Sort.Direction direction, String sortParam);
 
-    List<Request> fetchPageOfRequestsForUser(User user, int page, int countOnPage, Sort.Direction direction, String... sortParams);
+    List<Request> fetchPageOfRequestsForUser(User user, int page, int countOnPage, Sort.Direction direction, String sortParam);
 
-    List<Request> fetchPageOfRequestsForUserFiltered(User user, String name, int page, int countOnPage, Sort.Direction direction, String... sortParams);
+    List<Request> fetchPageOfRequestsForUserFiltered(User user, String name, int page, int countOnPage, Sort.Direction direction, String sortParam);
 
     Long changeRequestStatus(Request request, RequestStatus status);
 

@@ -4,13 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.TechnicalSupport.dto.RequestDto;
 import org.TechnicalSupport.dto.UserDto;
 import org.TechnicalSupport.dto.factories.DtoFactory;
+import org.TechnicalSupport.entity.Request;
 import org.TechnicalSupport.entity.User;
+import org.TechnicalSupport.entity.enums.RequestStatus;
 import org.TechnicalSupport.entity.enums.UserRole;
 import org.TechnicalSupport.exception.RoleAlreadySetException;
 import org.TechnicalSupport.exception.UserNotFoundException;
+import org.TechnicalSupport.exception.WrongRequestStatusException;
 import org.TechnicalSupport.repository.UserRepository;
 import org.TechnicalSupport.service.AdministratorService;
 import org.springframework.data.domain.Sort;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +32,10 @@ public class AdministratorController {
 
     private final AdministratorService administratorService;
     private final UserRepository userRepository;
+    private final DtoFactory<Request, RequestDto> requestDtoFactory;
+
+    private static final int REQUESTS_PER_PAGE = 5;
+    private static final String FETCH_PARAM = "createdAt";
 
     @GetMapping(LIST_ALL_USERS)
     public List<UserDto> getAllUsers() {
@@ -55,9 +63,39 @@ public class AdministratorController {
                                           @RequestParam(required = false, name = "name") String nameFilter,
                                           @RequestParam(required = false) String status) {
         Sort.Direction dir = Sort.Direction.valueOf(direction);
-
-        //TODO: finish this endpoint
-        return null;
+        RequestStatus requestStatus = null;
+        if (StringUtils.hasText(status)) {
+            requestStatus = RequestStatus.valueOf(status);
+        }
+        if (requestStatus == RequestStatus.DRAFT) {
+            throw new WrongRequestStatusException("Cant see draft requests");
+        }
+        if (StringUtils.hasText(nameFilter)) {
+            if (status != null) {
+                return administratorService
+                        .fetchPageOfRequestsForStatusFiltered(requestStatus, nameFilter, page,
+                                REQUESTS_PER_PAGE, dir, FETCH_PARAM).stream()
+                        .map(requestDtoFactory::toDto)
+                        .collect(Collectors.toList());
+            }
+            return administratorService
+                    .fetchPageOfRequestsFiltered(nameFilter, page,
+                            REQUESTS_PER_PAGE, dir, FETCH_PARAM).stream()
+                    .map(requestDtoFactory::toDto)
+                    .collect(Collectors.toList());
+        }
+        if (status != null) {
+            return administratorService
+                    .fetchPageOfRequestsForStatus(requestStatus, page,
+                            REQUESTS_PER_PAGE, dir, FETCH_PARAM).stream()
+                    .map(requestDtoFactory::toDto)
+                    .collect(Collectors.toList());
+        }
+        return administratorService
+                .fetchPageOfRequests(page,
+                        REQUESTS_PER_PAGE, dir, FETCH_PARAM).stream()
+                .map(requestDtoFactory::toDto)
+                .collect(Collectors.toList());
     }
 
 }
