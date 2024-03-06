@@ -24,7 +24,7 @@ public class OperatorServiceImpl implements OperatorService {
 
     @Override
     public List<Request> fetchPageOfRequests(int page, int countOnPage, Sort.Direction direction, String sortParam) {
-        return requestRepository.findAll(getPageable(page, countOnPage, direction, sortParam)).getContent();
+        return requestRepository.findAllByStatus(statusRepository.findByStatusEnum(RequestStatus.SENT).orElseThrow(), getPageable(page, countOnPage, direction, sortParam)).getContent();
     }
 
     @Override

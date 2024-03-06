@@ -43,7 +43,9 @@ public class WebSecurityConfiguration {
                                         OperatorController.FETCH_REQUESTS_FOR_USER,
                                         OperatorController.CHANGE_REQUEST_STATUS).hasAnyAuthority(UserRole.OPERATOR.name())
 
-                                .requestMatchers(AdministratorController.LIST_ALL_USERS).hasAnyAuthority(UserRole.ADMIN.name())
+                                .requestMatchers(AdministratorController.LIST_ALL_USERS,
+                                        AdministratorController.FETCH_REQUESTS,
+                                        AdministratorController.CREATE_OPERATOR).hasAnyAuthority(UserRole.ADMIN.name())
                                 .anyRequest()
                                 .authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))

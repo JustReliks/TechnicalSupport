@@ -11,6 +11,8 @@ import org.TechnicalSupport.repository.RoleRepository;
 import org.TechnicalSupport.repository.StatusRepository;
 import org.TechnicalSupport.repository.UserRepository;
 import org.TechnicalSupport.service.AdministratorService;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

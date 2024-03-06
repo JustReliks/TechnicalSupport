@@ -72,6 +72,9 @@ public class OperatorController {
     @GetMapping(FETCH_REQUEST_BY_ID)
     public RequestDto getRequest(@PathVariable Long id) {
         Request request = requestRepository.findById(id).orElseThrow(() -> new RequestNotFoundException("Can't find request with id %s".formatted(id)));
+        if(request.getStatus().getStatusEnum() != RequestStatus.SENT) {
+            throw new WrongRequestStatusException("You cant see not sent requests");
+        }
         return requestDtoFactory.toDto(request);
     }
 
@@ -87,7 +90,9 @@ public class OperatorController {
             throw new WrongRequestStatusException("Wrong request status: %s".formatted(status));
         }
         Request request = requestRepository.findById(id).orElseThrow(() -> new RequestNotFoundException("Request with id %s not found!".formatted(id)));
-
+        if(request.getStatus().getStatusEnum() != RequestStatus.SENT) {
+            throw new WrongRequestStatusException("You cant see not sent requests");
+        }
         return operatorService.changeRequestStatus(request, requestStatus);
     }
 
