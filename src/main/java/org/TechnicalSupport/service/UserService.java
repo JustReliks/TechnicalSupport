@@ -1,11 +1,15 @@
 package org.TechnicalSupport.service;
 
+import org.TechnicalSupport.entity.Request;
 import org.TechnicalSupport.entity.User;
-import org.TechnicalSupport.security.JwtUserDetails;
+import org.springframework.data.domain.Sort;
+
+import java.util.List;
 
 public interface UserService {
 
-   JwtUserDetails authenticate(String username, String password);
-   Long save(User user);
+    Long save(Request request);
+
+    List<Request> fetchPageOfRequests(User user, int page, int countOnPage,Sort.Direction direction, String... sortParams);
 
 }

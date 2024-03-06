@@ -1,20 +1,22 @@
 package org.TechnicalSupport.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.TechnicalSupport.dto.UserDto;
-import org.TechnicalSupport.dto.UserLoginDto;
-import org.TechnicalSupport.dto.UserLoginRequestDto;
+import org.TechnicalSupport.dto.RequestDto;
+import org.TechnicalSupport.dto.SimpleRequestDto;
 import org.TechnicalSupport.dto.factories.DtoFactory;
+import org.TechnicalSupport.entity.Request;
 import org.TechnicalSupport.entity.User;
-import org.TechnicalSupport.exception.UserAlreadyExistsException;
-import org.TechnicalSupport.repository.UserRepository;
-import org.TechnicalSupport.security.JwtUserDetails;
-import org.TechnicalSupport.service.LoginService;
-import org.TechnicalSupport.service.RegisterService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.TechnicalSupport.entity.enums.RequestStatus;
+import org.TechnicalSupport.exception.RequestNotFoundException;
+import org.TechnicalSupport.exception.UserNotFoundException;
+import org.TechnicalSupport.exception.WrongRequestStatusException;
+import org.TechnicalSupport.repository.RequestRepository;
+import org.TechnicalSupport.repository.StatusRepository;
+import org.TechnicalSupport.service.UserService;
+import org.TechnicalSupport.utils.ApplicationAuditingAware;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,36 +25,78 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserController {
 
-    public static final String LIST_ALL_USERS = "/api/v1/user";
-    public static final String LOGIN_USER = "/api/v1/user/login";
-    public static final String REGISTER_USER = "/api/v1/user/register";
+    public static final String CREATE_REQUEST = "/api/v1/user/request/create";
+    public static final String EDIT_REQUEST = "/api/v1/user/request/edit/{id}";
+    public static final String FETCH_REQUESTS = "/api/v1/user/request/{page}";
 
-    private final UserRepository userRepository;
-    private final DtoFactory<User, UserDto> userDtoFactory;
-    private final DtoFactory<JwtUserDetails, UserLoginDto> userLoginFactory;
-    private final LoginService loginService;
-    private final RegisterService registerService;
+    private static final int REQUESTS_PER_PAGE = 5;
+    private static final String FETCH_PARAM = "createdAt";
 
-    @PostMapping(LOGIN_USER)
-    public UserLoginDto login(@RequestBody UserLoginRequestDto userLogin) {
-        JwtUserDetails login = loginService.login(userLogin);
-        return userLoginFactory.toDto(login);
-    }
 
-    @PostMapping(REGISTER_USER)
-    public Long register(@RequestBody UserLoginRequestDto userLogin) {
-        if (userRepository.findUserByUsername(userLogin.getUsername()).isPresent()) {
-            throw new UserAlreadyExistsException("User with name %s already exists!".formatted(userLogin.getUsername()));
+    private final DtoFactory<Request, RequestDto> requestDtoFactory;
+
+    private final UserService userService;
+    private final StatusRepository statusRepository;
+    private final ApplicationAuditingAware auditingAware;
+    private final RequestRepository requestRepository;
+
+    @PostMapping(CREATE_REQUEST)
+    public Long openRequest(@RequestBody SimpleRequestDto dto, @RequestParam(defaultValue = "draft") String status) {
+        RequestStatus requestStatus;
+        try {
+            requestStatus = RequestStatus.valueOf(status.toUpperCase());
+            if (requestStatus == RequestStatus.ACCEPTED || requestStatus == RequestStatus.REJECTED) {
+                throw new IllegalArgumentException();
+            }
+
+        } catch (IllegalArgumentException e) {
+            throw new WrongRequestStatusException("Request status %s is incorrect!".formatted(status));
         }
-        return registerService.register(userLogin.getUsername(), userLogin.getPassword());
+
+        Request request = createRequest(dto, requestStatus);
+        return userService.save(request);
     }
 
-    @GetMapping(LIST_ALL_USERS)
-    public List<UserDto> getAllUsers() {
-        return userRepository
-                .findAll()
+
+    @PatchMapping(EDIT_REQUEST)
+    @Transactional
+    public Long editRequest(@RequestBody SimpleRequestDto simpleRequestDto,
+                            @PathVariable("id") Long id) {
+        Request request = requestRepository.findById(id)
+                .orElseThrow(() -> new RequestNotFoundException("Request with id %s not found".formatted(id)));
+
+        if (request.getStatus().getStatusEnum() != RequestStatus.DRAFT) {
+            throw new WrongRequestStatusException("You can't edit request which status is not \"draft\"");
+        }
+
+        request.setName(simpleRequestDto.getName());
+        request.setMessage(simpleRequestDto.getMessage());
+        request.setPhoneNumber(simpleRequestDto.getPhoneNumber());
+        return userService.save(request);
+    }
+
+    @GetMapping(FETCH_REQUESTS)
+    public List<RequestDto> fetchRequests(@PathVariable int page, @RequestParam(defaultValue = "ASC") String direction) {
+        return userService.fetchPageOfRequests(getCurrentUser()
+                        , page - 1, REQUESTS_PER_PAGE,
+                        Sort.Direction.valueOf(direction.toUpperCase()), FETCH_PARAM)
                 .stream()
-                .map(userDtoFactory::toDto)
+                .map(requestDtoFactory::toDto)
                 .collect(Collectors.toList());
     }
+
+    private Request createRequest(SimpleRequestDto dto, RequestStatus status) {
+        return Request.builder()
+                .name(dto.getName())
+                .author(getCurrentUser())
+                .message(dto.getMessage())
+                .phoneNumber(dto.getPhoneNumber())
+                .status(statusRepository.findByStatusEnum(status).orElseThrow())
+                .build();
+    }
+
+    private User getCurrentUser() {
+        return auditingAware.getCurrentAuditor().orElseThrow(() -> new UserNotFoundException("Cant find current user"));
+    }
+
 }

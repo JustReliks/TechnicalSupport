@@ -1,7 +1,9 @@
 package org.TechnicalSupport.configuration;
 
 import lombok.RequiredArgsConstructor;
-import org.TechnicalSupport.controllers.RequestController;
+import org.TechnicalSupport.controllers.AdministratorController;
+import org.TechnicalSupport.controllers.AuthenticationController;
+import org.TechnicalSupport.controllers.OperatorController;
 import org.TechnicalSupport.controllers.UserController;
 import org.TechnicalSupport.entity.enums.UserRole;
 import org.TechnicalSupport.security.jwt.JwtAuthenticationEntryPoint;
@@ -29,17 +31,26 @@ public class WebSecurityConfiguration {
                 .cors(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(registry ->
-                        registry.requestMatchers(UserController.LOGIN_USER)
+                        registry.requestMatchers(AuthenticationController.LOGIN_USER)
                                 .permitAll()
-                                .requestMatchers(UserController.REGISTER_USER)
+                                .requestMatchers(AuthenticationController.REGISTER_USER)
                                 .permitAll()
-                                .requestMatchers(UserController.LIST_ALL_USERS,
-                                        RequestController.CREATE_REQUEST,
-                                        RequestController.FETCH_REQUESTS).hasAnyAuthority(UserRole.USER.name())
+                                .requestMatchers(UserController.CREATE_REQUEST,
+                                        UserController.FETCH_REQUESTS).hasAnyAuthority(UserRole.USER.name())
+
+                                .requestMatchers(OperatorController.FETCH_REQUESTS,
+                                        OperatorController.FETCH_REQUEST_BY_ID,
+                                        OperatorController.FETCH_REQUESTS_FOR_USER,
+                                        OperatorController.CHANGE_REQUEST_STATUS).hasAnyAuthority(UserRole.OPERATOR.name())
+
+                                .requestMatchers(AdministratorController.LIST_ALL_USERS).hasAnyAuthority(UserRole.ADMIN.name())
                                 .anyRequest()
                                 .authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout(logout -> logout.logoutUrl(AuthenticationController.LOGOUT_USER)
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID"));
         return http.build();
 
     }

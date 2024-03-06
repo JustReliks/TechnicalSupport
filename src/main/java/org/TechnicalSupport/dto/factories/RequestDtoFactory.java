@@ -14,6 +14,8 @@ public class RequestDtoFactory implements DtoFactory<Request, RequestDto> {
                 .createdBy(request.getAuthor().getUsername())
                 .name(request.getName())
                 .phoneNumber(request.getPhoneNumber())
-                .message(request.getMessage()).build();
+                .message(request.getMessage())
+                .id(request.getId())
+                .build();
     }
 }

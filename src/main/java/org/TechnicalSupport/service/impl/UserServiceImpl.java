@@ -1,48 +1,31 @@
 package org.TechnicalSupport.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.TechnicalSupport.entity.Request;
 import org.TechnicalSupport.entity.User;
-import org.TechnicalSupport.entity.enums.UserRole;
-import org.TechnicalSupport.repository.RoleRepository;
-import org.TechnicalSupport.repository.UserRepository;
-import org.TechnicalSupport.security.JwtUserDetails;
-import org.TechnicalSupport.security.jwt.JwtUtils;
+import org.TechnicalSupport.repository.RequestRepository;
 import org.TechnicalSupport.service.UserService;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtils jwtUtils;
-    private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
+    private final RequestRepository requestRepository;
 
     @Override
-    public JwtUserDetails authenticate(String username, String password) {
-        String jwt;
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        jwt = jwtUtils.generateJwtToken(authentication);
-        ((JwtUserDetails) authentication.getPrincipal()).setToken(jwt);
-
-        return (JwtUserDetails) authentication.getPrincipal();
+    public Long save(Request request) {
+        return requestRepository.save(request).getId();
     }
 
     @Override
-    public Long save(User user) {
-        user.setRoles(Collections.singleton(roleRepository.findByRoleEnum(UserRole.USER).orElseThrow()));
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user).getId();
-
+    public List<Request> fetchPageOfRequests(User user, int page, int countOnPage, Sort.Direction direction, String... sortParams) {
+        Sort sort = Sort.by(direction, sortParams);
+        return requestRepository.findAllByAuthor(user, PageRequest.of(page, countOnPage, sort))
+                .getContent();
     }
 }
