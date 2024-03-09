@@ -15,6 +15,7 @@ import org.TechnicalSupport.repository.StatusRepository;
 import org.TechnicalSupport.service.UserService;
 import org.TechnicalSupport.utils.ApplicationAuditingAware;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,6 +66,9 @@ public class UserController {
         Request request = requestRepository.findById(id)
                 .orElseThrow(() -> new RequestNotFoundException("Request with id %s not found".formatted(id)));
 
+        if (!request.getAuthor().getId().equals(getCurrentUser().getId())) {
+            throw new AuthenticationServiceException("User can't edit request with %s id".formatted(id));
+        }
         if (request.getStatus().getStatusEnum() != RequestStatus.DRAFT) {
             throw new WrongRequestStatusException("You can't edit request which status is not \"draft\"");
         }
